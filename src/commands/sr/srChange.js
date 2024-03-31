@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 import determineTopTen from '../../utils/determineTopTen.js';
 
 const addCommand = {
@@ -6,8 +6,8 @@ const addCommand = {
     description: "increases SR of given player by given amount",
     devOnly: true,
     testOnly: false, 
-    permissionsRequired: [PermissionFlagBits.Administrator],
-    botPermissions: [PermissionFlagBits.Administrator],
+    permissionsRequired: [PermissionFlagsBits.Administrator],
+    botPermissions: [PermissionFlagsBits.Administrator],
     options: [
         {
             name: "player",

@@ -61,6 +61,7 @@ const addCommand = {
                     { name: `${user.rank} <${rankEmote(user.rank)}>`, value: `${user.SR}` },
                     { name: ' Games won ' , value: `${user.gamesWon}`, inline: true},
                     { name: ' Games lost ' , value: `${user.gamesLost}`, inline: true},
+                    { name: ' Hammer status' , value: 'cringe :grimacing:', inline: true},
                     { name: ' Last game played on ' , value: `${lastGame}\n (${moment(user.lastGamePlayed).fromNow()})`, inline: true},
                 )
                 //.setImage('https://i.imgur.com/AfFp7pu.png')
@@ -68,12 +69,28 @@ const addCommand = {
                 //.setFooter({ text: 'Some footer text here', iconURL: 'https://i.imgur.com/AfFp7pu.png' });
 
                 if (user.hammer) {
-                    // const file = new AttachmentBuilder('../../../images/hammer.png');
-                    rankEmbed
-                   // .setImage(`attachment://hammer.png`)
-                    .setDescription('<:hammer:1221908675980038266> hammer ');
-                    await interaction.followUp({ embeds: [rankEmbed]}); 
+                    let rankEmbed1 = new EmbedBuilder()
+                    .setTitle(`${userOption.username}'s Season Stats`)
+                    .setThumbnail(`${userAvatar}`)
+                    //.setImage(`attachment://${rankImage(user.rank)[1]}.png`)
+                    .addFields(
+                    { name: `${user.rank} <${rankEmote(user.rank)}>`, value: `${user.SR}` },
+                    { name: ' Games won ' , value: `${user.gamesWon}`, inline: true},
+                    { name: ' Games lost ' , value: `${user.gamesLost}`, inline: true},
+                    { name: ' Hammer status' , value: 'based <:hammer:1221908675980038266>', inline: true},
+                    { name: ' Last game played on ' , value: `${lastGame}\n (${moment(user.lastGamePlayed).fromNow()})`, inline: true},
+                    )
+                    
+                    await interaction.followUp({ embeds: [rankEmbed1]});
                 }
+                
+                    // // const file = new AttachmentBuilder('../../../images/hammer.png');
+                    // rankEmbed
+                    // .setTitle(`${userOption.username}'s Season Stats`)
+                    // // .setImage(`attachment://hammer.png`)
+                    // // .setDescription('<:hammer:1221908675980038266> hammer ');
+                    // await interaction.followUp({ embeds: [rankEmbed]}); 
+                
 
                 //files: [file]
 

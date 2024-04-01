@@ -36,29 +36,29 @@ const addCommand = {
                 const userAvatar =  userOption.displayAvatarURL({ dynamic: true, size: 1024 });
                 const lastGame = moment(user.lastGamePlayed).format('MMM D, YYYY, h:mm A');
                 
-                function rankImage(rank) {
+                function rankEmote(rank) {
                     switch(rank) {
                         case 'NTF Agent':
-                            return [new AttachmentBuilder('C:/Users/17863/elo/images/ntf.png'), 'ntf'];
+                            return ':ntfagent:1221908227843948655';
                         case 'Cadet':
-                            return [new AttachmentBuilder('C:/Users/17863/elo/images/cadet.png'), 'cadet'];
+                            return ':cadet:1221908308907135006';
                         case 'Ensign':
-                            return [new AttachmentBuilder('C:/Users/17863/elo/images/ensign.png'), 'ensign'];
+                            return ':ensign:1221908337788977263';
                         case 'Lieutenant':
-                            return [new AttachmentBuilder('C:/Users/17863/elo/images/liue.png'), 'liue'];
+                            return ':lieutenant:1221908390129963118';
                         case 'Sergeant':
-                            return [new AttachmentBuilder('C:/Users/17863/elo/images/serg.png'), 'serg'];
+                            return ':sergeant:1221908522195882044';
                         case 'Master':
-                            return [new AttachmentBuilder('C:/Users/17863/elo/images/mas.png'), 'mas'];
+                            return ':master:1221908642987507732';
                     }
                 }
 
                 let rankEmbed = new EmbedBuilder()
                 .setTitle(`${userOption.username}'s Season Stats`)
                 .setThumbnail(`${userAvatar}`)
-                .setImage(`attachment://${rankImage(user.rank)[1]}.png`)
+                //.setImage(`attachment://${rankImage(user.rank)[1]}.png`)
                 .addFields(
-                    { name: `${user.rank}`, value: `${user.SR}` },
+                    { name: `${user.rank} <${rankEmote(user.rank)}>`, value: `${user.SR}` },
                     { name: ' Games won ' , value: `${user.gamesWon}`, inline: true},
                     { name: ' Games lost ' , value: `${user.gamesLost}`, inline: true},
                     { name: ' Last game played on ' , value: `${lastGame}\n (${moment(user.lastGamePlayed).fromNow()})`, inline: true},
@@ -68,17 +68,19 @@ const addCommand = {
                 //.setFooter({ text: 'Some footer text here', iconURL: 'https://i.imgur.com/AfFp7pu.png' });
 
                 if (user.hammer) {
-                    const file = new AttachmentBuilder('C:/Users/17863/elo/images/hammer.png');
+                    // const file = new AttachmentBuilder('../../../images/hammer.png');
                     rankEmbed
-                    .setImage(`attachment://hammer.png`)
-                    .setDescription(':hammer:hammer:hammer: ');
-                    await interaction.followUp({ embeds: [rankEmbed] ,  files: [file]}); 
+                   // .setImage(`attachment://hammer.png`)
+                    .setDescription('<:hammer:1221908675980038266> hammer ');
+                    await interaction.followUp({ embeds: [rankEmbed]}); 
                 }
+
+                //files: [file]
 
                 else {
-                    await interaction.followUp({ embeds: [rankEmbed] ,  files: [rankImage(user.rank)[0]]}); 
+                    await interaction.followUp({ embeds: [rankEmbed]}); 
                 }
-
+                //files: [rankImage(user.rank)[0]]
             }
 
         } catch (error) {

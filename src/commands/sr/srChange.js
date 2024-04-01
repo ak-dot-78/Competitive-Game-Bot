@@ -1,10 +1,11 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 import determineTopTen from '../../utils/determineTopTen.js';
+import Rank from '../../schemas/Rank.js';
 
 const addCommand = {
     name: "srchange",
     description: "increases SR of given player by given amount",
-    devOnly: true,
+    devOnly: false,
     testOnly: false, 
     permissionsRequired: [PermissionFlagsBits.Administrator],
     botPermissions: [PermissionFlagsBits.Administrator],
@@ -18,7 +19,7 @@ const addCommand = {
         {
             name: "amount",
             description: "amount to increase",
-            type: ApplicationCommandOptionType.Integer,
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
     ],
@@ -28,7 +29,7 @@ const addCommand = {
 
 
             const player = interaction.options.getMentionable(`player`);
-            const amount = interaction.options.getString(`amount`);
+            const amount = +interaction.options.getString(`amount`);
             const guildId = interaction.guild.id;
             const userId = player.id;
 
@@ -41,8 +42,18 @@ const addCommand = {
                 { $set: { SR: newSR } },
                 { new: true }
             );
+            
+            if (amount > 0) {
+                await interaction.followUp(user.username + "'s SR increased by " + amount);
+            }
+            if (amount < 0) {
+                await interaction.followUp(user.username + "'s SR decreased by " + (-1 * amount));
+            }
+            if (amount === 0) {
+                await interaction.followUp(user.username + "'s SR not changed");
+            }
 
-            await interaction.followUp("boing");
+            
 
         } catch (error) {
             console.error("Failed to srchange: ", error);

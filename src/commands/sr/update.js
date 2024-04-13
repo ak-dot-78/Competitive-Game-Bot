@@ -16,6 +16,20 @@ const addCommand = {
     // testOnly: Boolean, 
     options: [
         {
+            name: "gamemode",
+            description: "mainframe? blind hackers? normal? hacker vc? blitz? timer?",
+            type: ApplicationCommandOptionType.String,
+            choices: [
+                { name: "Normal", value: "normal"},
+                { name: "Blind Hackers", value: "blindHackers"},
+                { name: "Mainframe", value: "mainframe"},
+                { name: "Hacker VC", value: "hackerVc"},
+                { name: "Blitz", value: "blitz"},
+                { name: "Timer", value: "timer"}
+            ],
+            required: false
+        },
+        {
             name: "player-1",
             description: "player 1",
             type: ApplicationCommandOptionType.Mentionable,
@@ -95,6 +109,54 @@ const addCommand = {
                 { name: "Loss", value: "loss" }
             ],
             required: true,
+        },
+        {
+            name: "player-6",
+            description: "player 6",
+            type: ApplicationCommandOptionType.Mentionable,
+            required: false,
+        },
+        {
+            name: "win-loss-6",
+            description: "+25 SR for win, -25 SR for loss",
+            type: ApplicationCommandOptionType.String, 
+            choices: [
+                { name: "Win", value: "win" },
+                { name: "Loss", value: "loss" }
+            ],
+            required: false,
+        },
+        {
+            name: "player-7",
+            description: "player 7",
+            type: ApplicationCommandOptionType.Mentionable,
+            required: false,
+        },
+        {
+            name: "win-loss-7",
+            description: "+25 SR for win, -25 SR for loss",
+            type: ApplicationCommandOptionType.String, 
+            choices: [
+                { name: "Win", value: "win" },
+                { name: "Loss", value: "loss" }
+            ],
+            required: false,
+        },
+        {
+            name: "player-8",
+            description: "player 8",
+            type: ApplicationCommandOptionType.Mentionable,
+            required: false,
+        },
+        {
+            name: "win-loss-8",
+            description: "+25 SR for win, -25 SR for loss",
+            type: ApplicationCommandOptionType.String, 
+            choices: [
+                { name: "Win", value: "win" },
+                { name: "Loss", value: "loss" }
+            ],
+            required: true,
         }
     ],
     callback: async (client, interaction) => {
@@ -134,7 +196,7 @@ const addCommand = {
 
                 await determineRank(userId, guildId);
                 await determineHammer(guildId);
-                await determineWinLossNumber(userId, guildId, winLossOption === "win" ? true : false);
+                await determineWinLossNumber(userId, guildId, winLossOption === "win" ? true : false, isAgent);
                 await determineLastPlayed(userId, guildId, timestamp);
 
                 // provide feedback for each player's update

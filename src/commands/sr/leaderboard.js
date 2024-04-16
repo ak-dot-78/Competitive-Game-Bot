@@ -37,7 +37,7 @@ const addCommand = {
                 const leaderboardEmbed = new EmbedBuilder()
                 .setTitle("Leaderboard")
                 .addFields(
-                    { name: 'Position', value: players.map((_, index) => `${index === 0 ? '1 <:hammer:1221908675980038266> ' : index + 1}`).join('\n'), inline: true },
+                    { name: 'Position', value: players.map((_, index) => `${index === 0 ? '1 <:hammer:1221908675980038266>' : index + 1}`).join('\n'), inline: true },
                     { name: 'Name', value: players.map(player => player.username).join('\n'), inline: true },
                     { name: 'SR Rating', value: players.map(player => player.SR.toString()).join('\n'), inline: true },
                 )

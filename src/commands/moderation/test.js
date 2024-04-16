@@ -1,5 +1,4 @@
 import { ApplicationCommandOptionType } from 'discord.js';
-import determineTopTen from '../../utils/determineTopTen.js';
 
 const addCommand = {
     name: "test",

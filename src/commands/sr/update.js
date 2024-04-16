@@ -5,8 +5,9 @@ import determineRank from '../../utils/determineRank.js';
 import { ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 import determineWinLossNumber from '../../utils/determineWinLossNumber.js';
 import determineLastPlayed from '../../utils/determineLastPlayed.js';
-
-const SR_CHANGE = 25; // Can be changed
+import determineAgentHacker from '../../utils/determineAgentHacker.js';
+import determineAgentHackerWinLoss from '../../utils/determineAgentHackerWinLoss.js';
+import determineSR from '../../utils/determineSR.js';
 
 const addCommand = {
     name: "update",
@@ -15,20 +16,6 @@ const addCommand = {
     // devOnly: true,
     // testOnly: Boolean, 
     options: [
-        {
-            name: "gamemode",
-            description: "mainframe? blind hackers? normal? hacker vc? blitz? timer?",
-            type: ApplicationCommandOptionType.String,
-            choices: [
-                { name: "Normal", value: "normal"},
-                { name: "Blind Hackers", value: "blindHackers"},
-                { name: "Mainframe", value: "mainframe"},
-                { name: "Hacker VC", value: "hackerVc"},
-                { name: "Blitz", value: "blitz"},
-                { name: "Timer", value: "timer"}
-            ],
-            required: false
-        },
         {
             name: "player-1",
             description: "player 1",
@@ -156,52 +143,103 @@ const addCommand = {
                 { name: "Win", value: "win" },
                 { name: "Loss", value: "loss" }
             ],
-            required: true,
-        }
+            required: false,
+        },
+        {
+            name: "gamemode",
+            description: "mainframe? blind hackers? normal? hacker vc? blitz? timer?",
+            type: ApplicationCommandOptionType.String,
+            choices: [
+                { name: "Normal", value: "normal"},
+                { name: "Blind Hackers", value: "blindHackers"},
+                { name: "Mainframe", value: "mainframe"},
+                { name: "Hacker VC", value: "hackerVc"},
+                { name: "Blitz", value: "blitz"},
+                { name: "Timer", value: "timer"}
+            ],
+            required: false
+        },
     ],
-    callback: async (client, interaction) => {
+    callback: async (client, interaction) => { 
         try {
+            let gameMode = interaction.options.getString("gamemode");
+            const guildId = interaction.guild.id;
+            const options = [
+                {player: "player-1",
+                wLOpt: "win-loss-1"},
+                {player: "player-2",
+                wLOpt: "win-loss-2"},
+                {player: "player-3",
+                wLOpt: "win-loss-3"},
+                {player: "player-4",
+                wLOpt: "win-loss-4"},
+                {player: "player-5",
+                wLOpt: "win-loss-5"},
+                {player: "player-6",
+                wLOpt: "win-loss-6"},
+                {player: "player-7",
+                wLOpt: "win-loss-7"},
+                {player: "player-8",
+                wLOpt: "win-loss-8"}
+            ];
+
+            if (!gameMode) {
+                gameMode = "normal";
+            }
+
             await interaction.deferReply(); // defer the initial reply
             let feedback = '';
-            for (let i = 0; i < 5; i++) {
-                let playerOption = interaction.options.getMentionable(`player-${i+1}`);
-                let winLossOption = interaction.options.getString(`win-loss-${i+1}`);
 
-                let srChange = winLossOption === "win" ? SR_CHANGE : -SR_CHANGE;
-                let userId = playerOption.user.id;
-                let guildId = interaction.guild.id;
-                let userObj = await client.users.fetch(userId);
+            // class playerInfo to introduce player objects containing info about win/loss
 
-                // find user's SR, update it or insert with default SR if it doesn't exist.
-                let user = await Rank.findOneAndUpdate(
-                    { userID: userId, guildID: guildId },
-                    { $setOnInsert: {username: userObj.username} },
-                    { new: true, upsert: true, setDefaultsOnInsert: true }
-                );
-
-                if (user.SR < 1400 && user.SR % 100 === 0 && srChange < 0) { 
-                    srChange = 0;
+            class playerInfo {
+                constructor(player, didWin) {
+                    this.player = player; // mentionable
+                    this.didWin = didWin; // boolean
                 }
-
-                let newSR = user.SR + srChange;
-
-                // update the SR in the database
-                await Rank.findOneAndUpdate(
-                    { userID: userId, guildID: guildId },
-                    { $set: { SR: newSR } },
-                    { new: true }
-                );
-
-                const timestamp = new Date();
-
-                await determineRank(userId, guildId);
-                await determineHammer(guildId);
-                await determineWinLossNumber(userId, guildId, winLossOption === "win" ? true : false, isAgent);
-                await determineLastPlayed(userId, guildId, timestamp);
-
-                // provide feedback for each player's update
-                feedback += `Updated SR for ${userObj.username}. You now have: ${newSR}\n`
             }
+
+            const playerArr = [];
+
+            for (let i = 0; i < options.length; i++){
+                if (interaction.options.getMentionable(options[i].player) !== null) {
+                    const didWin = interaction.options.getString(options[i].wLOpt) === "win" ? true : false;
+                    const playerObj = new playerInfo(interaction.options.getMentionable(`${options[i].player}`), didWin);
+                    playerArr.push(playerObj);
+                }
+            }
+            let agentsWon = false; // bool to det if agents won
+
+            const ret = determineAgentHacker(guildId, playerArr);
+
+            const winners = ret.winners || []; 
+            const losers = ret.losers || []; 
+
+            if (winners.length > losers.length) {
+                agentsWon = true;
+            }
+            await determineAgentHackerWinLoss(winners, guildId, agentsWon);
+            await determineAgentHackerWinLoss(losers, guildId, agentsWon);
+            await winners.forEach(e => {
+                determineSR(e.player.user.id, guildId);
+                determineWinLossNumber(e.player.user.id, guildId, true);
+            });
+            await losers.forEach(e => {
+                determineSR(e.player.user.id, guildId);
+                determineWinLossNumber(e.player.user.id, guildId, false);
+            });
+            await winners.concat(...losers).forEach(e => {
+                determineRank(e.player.user.id, guildId);
+                const timestamp = new Date();
+                determineLastPlayed(e.player.user.id, guildId, timestamp);
+            });
+            await determineHammer(guildId);
+            await winners.concat(...losers).forEach(e => {
+                const user = Rank.findOne(
+                    {userID: e.player.user.id, guildID: guildId}
+                );
+                feedback += `Updated SR for ${user.username}. You now have: ${user.SR}\n` // provide feedback for each player's update
+            });
             await interaction.followUp({
                 content: feedback + `Successfully updated SR for all players`,
             });
@@ -210,7 +248,6 @@ const addCommand = {
             await interaction.reply({ content: "There was an error processing your request.", ephemeral: true });
         }
     }
-
 };
 
 export default addCommand;

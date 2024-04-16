@@ -35,11 +35,34 @@ const rankSchema = new Schema({
         type: Number,
         default: 0,
     },
+    agentWins: {
+        type: Number,
+        default: 0
+    },
+    agentLosses: {
+        type: Number,
+        default: 0
+    },
+    hackerWins: {
+        type: Number,
+        default: 0
+    },
+    hackerLosses: {
+        type: Number,
+        default: 0
+    },
     lastGamePlayed: {
         type: Date,
         default: new Date('1967-09-25T10:30:00Z'),
+    },
+    agentMVP: {
+        type: Number,
+        default: 0
+    },
+    hackerMVP: {
+        type: Number,
+        default: 0
     }
-
 });
 
 export default mongoose.model('Rank', rankSchema);

@@ -54,7 +54,7 @@ const addCommand = {
                 }
 
                 let rankEmbed = new EmbedBuilder()
-                .setTitle(`${userOption.username}'s Season Stats`)
+                .setTitle(`${userOption.username}'s Player Card`)
                 .setThumbnail(`${userAvatar}`)
                 //.setImage(`attachment://${rankImage(user.rank)[1]}.png`)
                 .addFields(

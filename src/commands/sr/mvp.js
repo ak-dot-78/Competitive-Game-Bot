@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
+import Rank from '../../schemas/Rank.js';
 
 const addCommand = {
     name: "mvp",
@@ -28,31 +29,35 @@ const addCommand = {
     callback: async (client, interaction) => {
         try {
             await interaction.deferReply(); // defer the initial reply
-            
-            const userOption = interaction.options.getUser("user");
+            let userOption = interaction.options.getUser("user");
+    
+            if (!userOption) {
+                userOption = interaction.user;
+            }
+    
             const typeOption = interaction.options.getString("type");
-
-            const isAgent = typeOption === "agent" ? true : false;
-
+            const isAgent = typeOption === "agent";
+            console.log("isAgent:", isAgent);
+    
             const userId = userOption.id;
             const guildId = interaction.guild.id;
-            const user = await Rank.findOne( { userID: userId, guilID: guildId});
-
-            const newMVP = isAgent ? [user.agentMVP + 1, user.hackerMVP] : [user.agentMVP, user.hackerMVP + 1];
-
-            await Rank.findOneAndUpdate(
+            const user = await Rank.findOne({ userID: userId, guildID: guildId });
+    
+            if (!user) {
+                return interaction.followUp({ content: "User not found in the database.", ephemeral: true });
+            }
+    
+            const updatedUser = await Rank.findOneAndUpdate(
                 { userID: userId, guildID: guildId },
-                { $set: { agentMVP: newMVP[0], hackerMVP: newMVP[1] }},
+                isAgent ? { $inc: { agentMVP: 1 } } : { $inc: { hackerMVP: 1 } },
                 { new: true }
             );
-
-            interaction.reply(`${user.username} now has ${user.agentMVP} agent MVP points and ${user.hackerMVP} hacker points. Congratulations!`);
-
+    
+            interaction.followUp(`${updatedUser.username} now has ${updatedUser.agentMVP} agent MVPs and ${updatedUser.hackerMVP} hacker MVPs.`);
         } catch (error) {
             console.error("Failed to update MVP:", error);
             await interaction.reply({ content: "There was an error processing your request.", ephemeral: true });
         }
     }
-};
-
+}
 export default addCommand;

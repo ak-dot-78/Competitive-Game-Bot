@@ -212,34 +212,35 @@ const addCommand = {
 
             const ret = determineAgentHacker(guildId, playerArr);
 
-            const winners = ret.winners || []; 
-            const losers = ret.losers || []; 
-
+            const winners = ret.winners;
+            const losers = ret.losers;
+           
             if (winners.length > losers.length) {
                 agentsWon = true;
             }
+            else {
+                agentsWon = false;
+            }
+            for (const e of winners) {
+                await determineSR(client, e.player.user.id, guildId, true);
+                await determineWinLossNumber(e.player.user.id, guildId, true);
+            }
+            for (const e of losers) {
+                await determineSR(client, e.player.user.id, guildId, false);
+                await determineWinLossNumber(e.player.user.id, guildId, false);
+            }
             await determineAgentHackerWinLoss(winners, guildId, agentsWon);
             await determineAgentHackerWinLoss(losers, guildId, agentsWon);
-            await winners.forEach(e => {
-                determineSR(e.player.user.id, guildId);
-                determineWinLossNumber(e.player.user.id, guildId, true);
-            });
-            await losers.forEach(e => {
-                determineSR(e.player.user.id, guildId);
-                determineWinLossNumber(e.player.user.id, guildId, false);
-            });
-            await winners.concat(...losers).forEach(e => {
+            winners.concat(...losers).forEach(e => {
                 determineRank(e.player.user.id, guildId);
                 const timestamp = new Date();
                 determineLastPlayed(e.player.user.id, guildId, timestamp);
             });
             await determineHammer(guildId);
-            await winners.concat(...losers).forEach(e => {
-                const user = Rank.findOne(
-                    {userID: e.player.user.id, guildID: guildId}
-                );
-                feedback += `Updated SR for ${user.username}. You now have: ${user.SR}\n` // provide feedback for each player's update
-            });
+            for (const e of  winners.concat(...losers)) {
+                const user = await Rank.findOne({ userID: e.player.user.id, guildID: guildId });
+                feedback += `Updated SR for ${user.username}. You now have: ${user.SR}\n`; // provide feedback for each player's update
+            }
             await interaction.followUp({
                 content: feedback + `Successfully updated SR for all players`,
             });

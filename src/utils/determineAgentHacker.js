@@ -1,4 +1,4 @@
-export default async (guildId, players) => { // players is an array of user options
+export default (guildId, players) => { // players is an array of user options
     const winners = [];
     const losers = [];
     for (let i = 0; i < players.length; i++) {

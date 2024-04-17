@@ -58,6 +58,6 @@ export default async (client, interaction) => {
         await commandObject.callback(client, interaction);
 
     } catch (error) {
-        console.log("There was an error.")    
+        console.error("Error executing command:", error);
     }
 };

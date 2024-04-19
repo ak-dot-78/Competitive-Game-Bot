@@ -1,6 +1,7 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
-import determineTopTen from '../../utils/determineTopTen.js';
-import Rank from '../../schemas/Rank.js';
+import Player from '../../schemas/Player.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const addCommand = {
     name: "srchange",
@@ -33,12 +34,19 @@ const addCommand = {
             const guildId = interaction.guild.id;
             const userId = player.id;
 
-            const user = await Rank.findOne({ userID: userId, guildID: guildId });
+            const user = await Player.findOne({ userID: userId, guildID: guildId, season: process.env.CURRENT_SEASON });
+            const lifetimeUser = await Player.findOne({ userID: userId, guildID: guildId, season: "lifetime" });
 
             const newSR = user.SR + amount;
 
-            await Rank.findOneAndUpdate(
-                { userID: userId, guildID: guildId },
+            await Player.findOneAndUpdate(
+                { userID: userId, guildID: guildId, season: process.env.CURRENT_SEASON},
+                { $set: { SR: newSR } },
+                { new: true }
+            );
+
+            await Player.findOneAndUpdate(
+                { userID: userId, guildID: guildId, season: "lifetime"},
                 { $set: { SR: newSR } },
                 { new: true }
             );
@@ -53,8 +61,7 @@ const addCommand = {
                 await interaction.followUp(user.username + "'s SR not changed");
             }
 
-            
-
+            console.log("performed sr change for player, current and lifetime")
         } catch (error) {
             console.error("Failed to srchange: ", error);
             await interaction.reply({ content: "boing did not work", ephemeral: false });

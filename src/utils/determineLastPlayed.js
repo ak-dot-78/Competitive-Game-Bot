@@ -1,9 +1,9 @@
-import Rank from '../schemas/Rank.js';
+import Player from '../schemas/Player.js';
 
-export default async (userId, guildId, timestamp) => {
+export default async (userId, guildId, seasonId, timestamp) => {
     
-    await Rank.findOneAndUpdate(
-        { userID: userId, guildID: guildId },
+    await Player.findOneAndUpdate(
+        { userID: userId, guildID: guildId, season: seasonId },
         { $set: { lastGamePlayed: timestamp } },
         { new: true }
     );

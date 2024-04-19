@@ -1,32 +1,40 @@
-import Rank from '../../schemas/Rank.js';
 import determineTopTen from '../../utils/determineTopTen.js';
 import { ApplicationCommandOptionType,  EmbedBuilder } from 'discord.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const addCommand = {
     name: "leaderboard",
-    description: "look at the leaderboard!",
+    description: "look at the leaderboard! (default: current season)",
     // devOnly: true,
     // testOnly: Boolean, 
     options: [
+
         {
-            name: "server-id",
-            description: "server to be wiped",
+            name: "season-id",
+            description: "it's the season dawg",
             type: ApplicationCommandOptionType.String,
-        },
+            choices: [
+                { name: "Lifetime", value: "lifetime"},
+                { name: "pre-season", value: "0000" },
+                { name: "season-1", value: "0001" }
+            ]
+        }
     ],
     callback: async (client, interaction) => {
 
-        let guildId = interaction.options.getString('server-id');
+        const guildId = interaction.guildId;
+        let seasonId = interaction.options.getString('season-id');
 
-        // Set guildId to test-server-id if it hasn't been input
-        if (!guildId) {
-            guildId = interaction.guild.id;
+        if (!seasonId) {
+            seasonId = process.env.CURRENT_SEASON;
         }
+
 
         try {
             await interaction.deferReply(); // defer the initial reply
 
-            const players = await determineTopTen(guildId);
+            const players = await determineTopTen(guildId, seasonId);
 
             if (players.length === 0) {
                 await interaction.followUp('There are no users in this server.');
@@ -35,7 +43,7 @@ const addCommand = {
             else {
 
                 const leaderboardEmbed = new EmbedBuilder()
-                .setTitle("Leaderboard")
+                .setTitle(`Season ${seasonId} Leaderboard`)
                 .addFields(
                     { name: 'Position', value: players.map((_, index) => `${index === 0 ? '1 <:hammer:1221908675980038266>' : index + 1}`).join('\n'), inline: true },
                     { name: 'Name', value: players.map(player => player.username).join('\n'), inline: true },
@@ -44,6 +52,7 @@ const addCommand = {
                 .setColor('#0099ff') 
                 .setTimestamp(); 
                 await interaction.followUp({ embeds: [leaderboardEmbed] });
+                console.log("Replied with leaderboard stats.");
 
             }
             

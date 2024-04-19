@@ -1,10 +1,10 @@
-import Rank from '../schemas/Rank.js';
+import Player from '../schemas/Player.js';
 
-export default async (client, userId, guildId, didWin) => { // players is an array of user options
+export default async (client, userId, guildId, seasonId, didWin) => { // players is an array of user options
     const userObj = await client.users.fetch(userId);
     // find user's SR, update it or insert with default SR if it doesn't exist
-    const user = await Rank.findOneAndUpdate(
-        { userID: userId, guildID: guildId },
+    const user = await Player.findOneAndUpdate(
+        { userID: userId, guildID: guildId, season: seasonId },
         { $setOnInsert: {username: userObj.username} },
         { new: true, upsert: true, setDefaultsOnInsert: true }
     );
@@ -20,8 +20,8 @@ export default async (client, userId, guildId, didWin) => { // players is an arr
     let newSR = user.SR + srChange;
 
     // update the SR in the database
-    await Rank.findOneAndUpdate(
-        { userID: userId, guildID: guildId },
+    await Player.findOneAndUpdate(
+        { userID: userId, guildID: guildId, season: seasonId },
         { $set: { SR: newSR } },
         { new: true }
     );

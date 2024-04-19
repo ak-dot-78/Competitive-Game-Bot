@@ -1,7 +1,12 @@
+import { StringSelectMenuBuilder } from "@discordjs/builders";
 import { Schema, model } from "mongoose";
 import mongoose from 'mongoose';
 
-const rankSchema = new Schema({
+const playerSchema = new Schema({
+    season: {
+        type: String,
+        required: true
+    },
     userID: {
         type: String, 
         required: true,
@@ -76,5 +81,5 @@ const rankSchema = new Schema({
     }
 });
 
-export default mongoose.model('Rank', rankSchema);
+export default mongoose.model('Player', playerSchema);
 

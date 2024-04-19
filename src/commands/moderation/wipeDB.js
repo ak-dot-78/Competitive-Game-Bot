@@ -1,4 +1,4 @@
-import Rank from '../../schemas/Rank.js';
+import Player from '../../schemas/Player.js';
 import { ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 import config from '../../../config.json' assert { type: 'json' };
 import wipeDB from '../../utils/wipeDB.js';

@@ -1,12 +1,12 @@
-import Rank from '../schemas/Rank.js';
+import Player from '../schemas/Player.js';
 
-export default async (userId, guildId, win) => {
-    const user = await Rank.findOne({ userID: userId, guildID: guildId });
+export default async (userId, guildId, seasonId, win) => {
+    const user = await Player.findOne({ userID: userId, guildID: guildId, season: seasonId});
     
     if (win) {
         const newWin = user.gamesWon + 1;
-        await Rank.findOneAndUpdate(
-            { userID: userId, guildID: guildId },
+        await Player.findOneAndUpdate(
+            { userID: userId, guildID: guildId, season: seasonId },
             { $set: { gamesWon: newWin } },
             { new: true }
         );  
@@ -14,8 +14,8 @@ export default async (userId, guildId, win) => {
 
     else {
         const newLoss = user.gamesLost + 1;
-        await Rank.findOneAndUpdate(
-        { userID: userId, guildID: guildId },
+        await Player.findOneAndUpdate(
+        { userID: userId, guildID: guildId, season: seasonId },
         { $set: { gamesLost: newLoss} },
         { new: true }
         );

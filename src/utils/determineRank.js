@@ -1,4 +1,4 @@
-import Rank from '../schemas/Rank.js';
+import Player from '../schemas/Player.js';
 
 const determineNewRank = (SR) => {
     if (SR >= 1500) return 'Master';
@@ -9,13 +9,13 @@ const determineNewRank = (SR) => {
     return 'NTF Agent'; 
 };
 
-export default async (userId, guildId) => {
-    const user = await Rank.findOne({ userID: userId, guildID: guildId });
+export default async (userId, guildId, seasonId) => {
+    const user = await Player.findOne({ userID: userId, guildID: guildId, season: seasonId });
     if (!user) return; 
     const newRank = determineNewRank(user.SR);
     if (user.rank !== newRank) {
-        await Rank.findOneAndUpdate(
-            { userID: userId, guildID: guildId },
+        await Player.findOneAndUpdate(
+            { userID: userId, guildID: guildId, season: seasonId },
             { $set: { rank: newRank } },
             { new: true }
         );

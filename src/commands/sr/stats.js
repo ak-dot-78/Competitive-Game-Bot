@@ -1,5 +1,7 @@
-import Rank from '../../schemas/Rank.js';
+import Player from '../../schemas/Player.js';
 import { ApplicationCommandOptionType,  EmbedBuilder, AttachmentBuilder } from 'discord.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const addCommand = {
     name: "stats",
@@ -12,19 +14,34 @@ const addCommand = {
             description: "check their stats",
             type: ApplicationCommandOptionType.Mentionable,
         },
+        {
+            name: "season-id",
+            description: "it's the season dawg",
+            type: ApplicationCommandOptionType.String,
+            choices: [
+                { name: "Lifetime", value: "lifetime"},
+                { name: "pre-season", value: "0000" },
+                { name: "season-1", value: "0001" }
+            ]
+        },
     ],
     callback: async (client, interaction) => {
         let userOption = interaction.options.getUser("user");
+        let seasonId = interaction.options.getString('season-id');
 
         if (!userOption) {
             userOption = interaction.user;
+        }
+
+        if (!seasonId) {
+            seasonId = process.env.CURRENT_SEASON;
         }
 
         const userId = userOption.id;
         const guildId = interaction.guild.id;
         try {
             await interaction.deferReply(); // defer the initial reply
-            const user = await Rank.findOne({ userID: userId, guildID: guildId });
+            const user = await Player.findOne({ userID: userId, guildID: guildId, season: seasonId });
 
             if (!user) {
                 interaction.followUp(`<@${userId}> not found.`);
@@ -33,7 +50,7 @@ const addCommand = {
             else {
                 
                 let statEmbed = new EmbedBuilder()
-                .setTitle(`${userOption.username}'s Season Stats`)
+                .setTitle(`${userOption.username}'s ${interaction.options.getString('season-id')} Stats`)
                 //.setImage(`attachment://${rankImage(user.rank)[1]}.png`)
                 .addFields(
                     { name: ' Wins ' , value: `${user.gamesWon}`, inline: true},
@@ -57,6 +74,7 @@ const addCommand = {
                 //.setFooter({ text: 'Some footer text here', iconURL: 'https://i.imgur.com/AfFp7pu.png' });
 
                 await interaction.followUp({ embeds: [statEmbed]}); 
+                console.log(`displayed ${userOption.username}'s ${interaction.options.getString('season-id')} Stats`)
             }
 
         } catch (error) {

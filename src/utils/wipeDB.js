@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import Rank from '../schemas/Rank.js';
+import Player from '../schemas/Player.js';
 
 export default async (guildId) => {
     try {
 
-        await Rank.deleteMany({ guildID: guildId });
+        await Player.deleteMany({ guildID: guildId });
         console.log(`Data wiped for guild with ID ${guildId}.`);
 
     } catch (error) {

@@ -1,5 +1,7 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
-import Rank from '../../schemas/Rank.js';
+import Player from '../../schemas/Player.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const addCommand = {
     name: "mvp",
@@ -41,19 +43,31 @@ const addCommand = {
     
             const userId = userOption.id;
             const guildId = interaction.guild.id;
-            const user = await Rank.findOne({ userID: userId, guildID: guildId });
+            const user = await Player.findOne({ userID: userId, guildID: guildId, season: process.env.CURRENT_SEASON });
+            const lifetimeUser = await Player.findOne({ userID: userId, guildID: guildId, season: "lifetime" });
     
             if (!user) {
                 return interaction.followUp({ content: "User not found in the database.", ephemeral: true });
             }
+
+            if (!lifetimeUser) {
+                return interaction.followUp({ content: "User not found in the database.", ephemeral: true });
+            }
     
-            const updatedUser = await Rank.findOneAndUpdate(
-                { userID: userId, guildID: guildId },
+            const updatedUser = await Player.findOneAndUpdate(
+                { userID: userId, guildID: guildId, season: process.env.CURRENT_SEASON },
+                isAgent ? { $inc: { agentMVP: 1 } } : { $inc: { hackerMVP: 1 } },
+                { new: true }
+            );
+
+            await Player.findOneAndUpdate(
+                { userID: userId, guildID: guildId, season: "lifetime" },
                 isAgent ? { $inc: { agentMVP: 1 } } : { $inc: { hackerMVP: 1 } },
                 { new: true }
             );
     
             interaction.followUp(`${updatedUser.username} now has ${updatedUser.agentMVP} agent MVPs and ${updatedUser.hackerMVP} hacker MVPs.`);
+            console.log(`MVP updated for ${updatedUser.username} in current and lifetime`);
         } catch (error) {
             console.error("Failed to update MVP:", error);
             await interaction.reply({ content: "There was an error processing your request.", ephemeral: true });

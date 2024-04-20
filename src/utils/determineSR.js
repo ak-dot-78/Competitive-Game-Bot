@@ -34,7 +34,22 @@ export default async (client, userId, guildId, seasonId, didWin) => { // players
             srChange = 0;
         }
         else {
-            srChange = -20;
+            if ((user.SR % 1000) % 100 === 10) {
+                srChange = -10;
+            }
+            else {
+                if ((user.SR % 1000) % 100 === 5) {
+                    srChange = -5;
+                }
+                else {
+                    if ((user.SR % 1000) % 100 === 15) {
+                        srChange = -15;
+                    }
+                    else {
+                        srChange = -20;
+                    }
+                }
+            }
         }
     }
 

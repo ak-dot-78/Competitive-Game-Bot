@@ -1,6 +1,7 @@
 import Player from '../../schemas/Player.js';
 import moment from 'moment';
 import { ApplicationCommandOptionType,  EmbedBuilder, AttachmentBuilder } from 'discord.js';
+import displaySeasonName from '../../utils/displaySeasonName.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -40,6 +41,7 @@ const addCommand = {
 
         const userId = userOption.id;
         const guildId = interaction.guild.id;
+        const displayName = displaySeasonName(seasonId);
         try {
             await interaction.deferReply(); // defer the initial reply
             const user = await Player.findOne({ userID: userId, guildID: guildId, season: seasonId });
@@ -71,7 +73,7 @@ const addCommand = {
                 }
 
                 let rankEmbed = new EmbedBuilder()
-                .setTitle(`${userOption.username}'s Player Card`)
+                .setTitle(`${userOption.username}'s ${displayName} Player Card`)
                 .setThumbnail(`${userAvatar}`)
                 //.setImage(`attachment://${rankImage(user.rank)[1]}.png`)
                 .addFields(

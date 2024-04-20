@@ -39,7 +39,7 @@ const addCommand = {
     
             const typeOption = interaction.options.getString("type");
             const isAgent = typeOption === "agent";
-            console.log("isAgent:", isAgent);
+
     
             const userId = userOption.id;
             const guildId = interaction.guild.id;

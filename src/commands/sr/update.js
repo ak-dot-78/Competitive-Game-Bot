@@ -1,11 +1,10 @@
 import Player from '../../schemas/Player.js';
-import mongoose from 'mongoose';
 import determineHammer from '../../utils/determineHammer.js';
 import determineRank from '../../utils/determineRank.js';
 import { ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 import determineWinLossNumber from '../../utils/determineWinLossNumber.js';
 import determineLastPlayed from '../../utils/determineLastPlayed.js';
-import determineAgentHacker from '../../utils/determineAgentHacker.js';
+import determineWinnersLosers from '../../utils/determineWinnersLosers.js';
 import determineAgentHackerWinLoss from '../../utils/determineAgentHackerWinLoss.js';
 import determineSR from '../../utils/determineSR.js';
 import dotenv from 'dotenv';
@@ -15,7 +14,7 @@ const addCommand = {
     name: "update",
     description: "update SRs from a recent game",
     permissions: PermissionFlagsBits.Administrator,
-    // devOnly: true,
+    devOnly: true,
     // testOnly: Boolean, 
     options: [
         {
@@ -212,7 +211,7 @@ const addCommand = {
             }
             let agentsWon = false; // bool to det if agents won
 
-            const ret = determineAgentHacker(playerArr);
+            const ret = determineWinnersLosers(playerArr);
 
             const winners = ret.winners;
             const losers = ret.losers;
@@ -226,19 +225,26 @@ const addCommand = {
             for (const e of winners) {
                 await determineSR(client, e.player.user.id, guildId, process.env.CURRENT_SEASON, true);
                 await determineWinLossNumber(e.player.user.id, guildId, process.env.CURRENT_SEASON, true);
+                await determineSR(client, e.player.user.id, guildId, "lifetime", true);
+                await determineWinLossNumber(e.player.user.id, guildId, "lifetime", true);
             }
             for (const e of losers) {
                 await determineSR(client, e.player.user.id, guildId, process.env.CURRENT_SEASON, false);
                 await determineWinLossNumber(e.player.user.id, guildId, process.env.CURRENT_SEASON, false);
+                await determineSR(client, e.player.user.id, guildId, "lifetime", false);
+                await determineWinLossNumber(e.player.user.id, guildId, "lifetime", false);
             }
             await determineAgentHackerWinLoss(winners, guildId, process.env.CURRENT_SEASON, agentsWon);
             await determineAgentHackerWinLoss(losers, guildId, process.env.CURRENT_SEASON, agentsWon);
+            await determineAgentHackerWinLoss(winners, guildId, "lifetime", agentsWon);
+            await determineAgentHackerWinLoss(losers, guildId, "lifetime", agentsWon);
             winners.concat(...losers).forEach(e => {
                 determineRank(e.player.user.id, guildId, process.env.CURRENT_SEASON,);
                 const timestamp = new Date();
                 determineLastPlayed(e.player.user.id, guildId, process.env.CURRENT_SEASON, timestamp);
             });
             await determineHammer(guildId, process.env.CURRENT_SEASON);
+            await determineHammer(guildId, "lifetime");
             for (const e of  winners.concat(...losers)) {
                 const user = await Player.findOne({ userID: e.player.user.id, guildID: guildId, season: process.env.CURRENT_SEASON });
                 feedback += `Updated SR for ${user.username}. You now have: ${user.SR}\n`; // provide feedback for each player's update

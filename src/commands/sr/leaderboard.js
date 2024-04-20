@@ -1,5 +1,6 @@
 import determineTopTen from '../../utils/determineTopTen.js';
 import { ApplicationCommandOptionType,  EmbedBuilder } from 'discord.js';
+import displaySeasonName from '../../utils/displaySeasonName.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -35,6 +36,7 @@ const addCommand = {
             await interaction.deferReply(); // defer the initial reply
 
             const players = await determineTopTen(guildId, seasonId);
+            const displayName = displaySeasonName(seasonId);
 
             if (players.length === 0) {
                 await interaction.followUp('There are no users in this server.');
@@ -43,7 +45,7 @@ const addCommand = {
             else {
 
                 const leaderboardEmbed = new EmbedBuilder()
-                .setTitle(`Season ${seasonId} Leaderboard`)
+                .setTitle(`${displayName} Leaderboard`)
                 .addFields(
                     { name: 'Position', value: players.map((_, index) => `${index === 0 ? '1 <:hammer:1221908675980038266>' : index + 1}`).join('\n'), inline: true },
                     { name: 'Name', value: players.map(player => player.username).join('\n'), inline: true },

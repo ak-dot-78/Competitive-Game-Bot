@@ -35,7 +35,6 @@ const addCommand = {
             const userId = player.id;
 
             const user = await Player.findOne({ userID: userId, guildID: guildId, season: process.env.CURRENT_SEASON });
-            const lifetimeUser = await Player.findOne({ userID: userId, guildID: guildId, season: "lifetime" });
 
             const newSR = user.SR + amount;
 

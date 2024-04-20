@@ -7,7 +7,7 @@ const { testServer } = config; // experimental possible bug
 const addCommand = {
     name: "wipe-database",
     description: "wipe database for a specific server (default: test server)",
-    // devOnly: true,
+    devOnly: true,
     // testOnly: Boolean, 
     permissions: PermissionFlagsBits.Administrator,
     options: [

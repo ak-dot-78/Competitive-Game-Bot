@@ -1,7 +1,7 @@
 import Player from '../../schemas/Player.js';
 import determineHammer from '../../utils/determineHammer.js';
 import determineRank from '../../utils/determineRank.js';
-import { ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
+import { ActionRowBuilder, ApplicationCommandOptionType, ButtonBuilder, ComponentType, ButtonStyle, PermissionFlagsBits } from 'discord.js';
 import determineWinLossNumber from '../../utils/determineWinLossNumber.js';
 import determineLastPlayed from '../../utils/determineLastPlayed.js';
 import determineWinnersLosers from '../../utils/determineWinnersLosers.js';
@@ -14,7 +14,7 @@ const addCommand = {
     name: "update",
     description: "update SRs from a recent game",
     permissions: PermissionFlagsBits.Administrator,
-    devOnly: true,
+    devOnly: false,
     // testOnly: Boolean, 
     options: [
         {
@@ -252,8 +252,102 @@ const addCommand = {
             await interaction.followUp({
                 content: feedback + `Successfully updated SR for all players`,
             });
+
+            // handling mvp
+
+            const agentMVPButtons = [];
+            const hackerMVPButtons = [];
+            let counter = '1';
+
+            if (agentsWon) { // if agentsWon then winners are green losers are red
+                for (const e of winners) { // dealing with agent mvp
+                    const user = await Player.findOne({ userID: e.player.user.id, guildID: guildId, season: process.env.CURRENT_SEASON });
+                    const agentButton = new ButtonBuilder()
+                    .setLabel(`${user.username}`)
+                    .setStyle(ButtonStyle.Success)
+                    .setCustomId(`${counter}-${user.userID}`);
+                    counter++;
+                    agentMVPButtons.push(agentButton);
+                    console.log(`${counter}-${user.userID}`);
+                }
+                for (const e of losers) { // dealing with hacker mvp
+                    const user = await Player.findOne({ userID: e.player.user.id, guildID: guildId, season: process.env.CURRENT_SEASON });
+                    const hackerButton = new ButtonBuilder()
+                    .setLabel(`${user.username}`)
+                    .setStyle(ButtonStyle.Danger)
+                    .setCustomId(`${counter}-${user.userID}`);
+                    counter++;
+                    hackerMVPButtons.push(hackerButton);
+                }
+            }
+            else { // !agentsWon: winners are red losers are green
+                for (const e of losers) { // dealing with agent mvp
+                    const user = await Player.findOne({ userID: e.player.user.id, guildID: guildId, season: process.env.CURRENT_SEASON });
+                    const agentButton = new ButtonBuilder()
+                    .setLabel(`${user.username}`)
+                    .setStyle(ButtonStyle.Success)
+                    .setCustomId(`${counter}-${user.userID}`);
+                    counter++;
+                    agentMVPButtons.push(agentButton);
+                }
+                for (const e of winners) { // dealing with hacker mvp
+                    const user = await Player.findOne({ userID: e.player.user.id, guildID: guildId, season: process.env.CURRENT_SEASON });
+                    const hackerButton = new ButtonBuilder()
+                    .setLabel(`${user.username}`)
+                    .setStyle(ButtonStyle.Danger)
+                    .setCustomId(`${counter}-${user.userID}`);
+                    counter++;
+                    hackerMVPButtons.push(hackerButton);
+                }
+            }
+
+            const mvpButtonRow = new ActionRowBuilder().addComponents(...agentMVPButtons, ...hackerMVPButtons);
+
+            const mvpVoter = await interaction.followUp({
+                content: `Vote for your Agent and Hacker MVPs!`,
+                components: [mvpButtonRow]
+            });
+
+            const interactedUsers = new Set();
+
+            const filter = (i) => {
+                if (winners.concat(...losers).includes(i.user.id) && !interactedUsers.has(i.user.id)) {
+                    interactedUsers.add(i.user.id);
+                    return true;
+                }
+                return false;
+            };
+
+            const collector = mvpVoter.createMessageComponentCollector({
+                componentType: ComponentType.Button, 
+                filter,
+                //time: 10_000
+            });
+
+            collector.on('collect', async (buttonClick) => {
+                await buttonClick.deferReply(); // Acknowledge the button click first
+                const buttonClickId = buttonClick.customId;
+                // const buttonOptions = winners.concat(...losers);
+                // const [index, userId] = buttonClick.customId.split('-'); // Extracting index from ID
+                // console.log(index);
+                if (buttonClickId === '1-1218027044869509260') {
+                    buttonClick.followUp({ content: `You clicked on: ${selectedUser.player.user.username}`, ephemeral: true });
+                }
+
+                // if (!isNaN(index) && parseInt(index) > 0 && parseInt(index) <= winners.concat(losers).length) {
+                //     const selectedUser = winners.concat(losers)[parseInt(index) - 1]; // Accessing the selected user based on index
+                //     // Confirm the userId matches the button clicked
+                //     if (selectedUser.player.user.id === userId) {
+                //         buttonClick.followUp({ content: `You clicked on: ${selectedUser.player.user.username}`, ephemeral: true });
+                //     } else {
+                //         buttonClick.followUp({ content: 'There was a mismatch with the user data.', ephemeral: true });
+                //     }
+                // } else {
+                //     buttonClick.followUp({ content: 'This button is not recognized!', ephemeral: true });
+                // }
+            });
         } catch (error) {
-            console.error("Failed to update SR:", error);
+            console.error("Failed to update:", error);
             await interaction.reply({ content: "There was an error processing your request.", ephemeral: true });
         }
     }

@@ -30,26 +30,11 @@ export default async (client, userId, guildId, seasonId, didWin) => { // players
     }
 
     else { // PLAYER LOST
-        if (user.SR < 1500 && user.SR % 100 === 0) { 
-            srChange = 0;
+        if (user.SR >= 1500 || user.SR % 100 >= 20) { 
+            srChange = -20;
         }
         else {
-            if ((user.SR % 1000) % 100 === 10) {
-                srChange = -10;
-            }
-            else {
-                if ((user.SR % 1000) % 100 === 5) {
-                    srChange = -5;
-                }
-                else {
-                    if ((user.SR % 1000) % 100 === 15) {
-                        srChange = -15;
-                    }
-                    else {
-                        srChange = -20;
-                    }
-                }
-            }
+            srChange = -(user.SR % 100);
         }
     }
 

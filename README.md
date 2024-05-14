@@ -12,4 +12,5 @@ Discord Bot to maintain video game statistics.
 - npm install 
 - to run: npm run start:dev
 
-## Acknowledgements: Under Ctrl - Youtube https://www.youtube.com/@UnderCtrl
+## Acknowledgements: 
+- Under Ctrl - Youtube https://www.youtube.com/@UnderCtrl

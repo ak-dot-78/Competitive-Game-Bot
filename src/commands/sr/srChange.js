@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 import Player from '../../schemas/Player.js';
 import dotenv from 'dotenv';
@@ -6,7 +7,7 @@ dotenv.config();
 const addCommand = {
     name: "srchange",
     description: "increases SR of given player by given amount",
-    devOnly: false,
+    devOnly: true,
     testOnly: false, 
     permissionsRequired: [PermissionFlagsBits.Administrator],
     botPermissions: [PermissionFlagsBits.Administrator],
@@ -25,6 +26,10 @@ const addCommand = {
         },
     ],
     callback: async (client, interaction) => {
+        // Check if the user has administrator permissions
+        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+            return interaction.reply({ content: "You do not have permission to use this command.", ephemeral: true });
+        }
         try {
             await interaction.deferReply(); // defer the initial reply
 

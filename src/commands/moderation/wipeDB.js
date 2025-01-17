@@ -18,6 +18,12 @@ const addCommand = {
         },
     ],
     callback: async (client, interaction) => {
+
+        // Check if the user has administrator permissions
+        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+            return interaction.reply({ content: "You do not have permission to use this command.", ephemeral: true });
+        }
+        
         let guildId = interaction.options.getString('server-id');
 
         // Set guildId to test-server-id if it hasn't been input

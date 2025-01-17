@@ -9,13 +9,13 @@ const determineNewRank = (SR) => {
     return 'NTF Agent'; 
 };
 
-export default async (userId, guildId, seasonId) => {
-    const user = await Player.findOne({ userID: userId, guildID: guildId, season: seasonId });
+export default async (userId, guildId, seasonId, isDefault) => {
+    const user = await Player.findOne({ userID: userId, guildID: guildId, season: seasonId, gameDef: isDefault });
     if (!user) return; 
     const newRank = determineNewRank(user.SR);
     if (user.rank !== newRank) {
         await Player.findOneAndUpdate(
-            { userID: userId, guildID: guildId, season: seasonId },
+            { userID: userId, guildID: guildId, season: seasonId, gameDef: isDefault },
             { $set: { rank: newRank } },
             { new: true }
         );

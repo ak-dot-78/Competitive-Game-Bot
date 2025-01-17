@@ -1,6 +1,6 @@
 import Player from '../../schemas/Player.js';
 import moment from 'moment';
-import { ApplicationCommandOptionType,  EmbedBuilder, AttachmentBuilder } from 'discord.js';
+import { ApplicationCommandOptionType,  EmbedBuilder } from 'discord.js';
 import displaySeasonName from '../../utils/displaySeasonName.js';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -11,6 +11,16 @@ const addCommand = {
     // devOnly: true,
     // testOnly: Boolean, 
     options: [
+        {
+            name: "gamemode",
+            description: "mainframe? blind hackers? normal? hacker vc? blitz? timer?",
+            type: ApplicationCommandOptionType.String,
+            choices: [
+                { name: "Default", value: "default"},
+                { name: "Party", value: "variety"}
+            ],
+            required: true
+        },
         {
             name: "user",
             description: "check their rank",
@@ -23,28 +33,40 @@ const addCommand = {
             choices: [
                 { name: "Lifetime", value: "lifetime"},
                 { name: "pre-season", value: "0000" },
-                { name: "season-1", value: "0001" }
+                { name: "season-1", value: "0001" }, 
+                { name: "season-2", value: "0002"},
+                { name: "season-3", value: "0003"}
             ]
         },
     ],
     callback: async (client, interaction) => {
         let userOption = interaction.options.getUser("user");
         let seasonId = interaction.options.getString('season-id');
+        let gameMode = interaction.options.getString("gamemode");
+
+        let isDefault = true;
+
+        if (gameMode === "variety") {
+            isDefault = false;
+        }
+
 
         if (!userOption) {
             userOption = interaction.user;
         }
 
         if (!seasonId) {
+            // eslint-disable-next-line no-undef
             seasonId = process.env.CURRENT_SEASON;
         }
 
         const userId = userOption.id;
         const guildId = interaction.guild.id;
-        const displayName = displaySeasonName(seasonId);
+        const displayName = displaySeasonName(seasonId, isDefault);
+        console.log(displayName);
         try {
             await interaction.deferReply(); // defer the initial reply
-            const user = await Player.findOne({ userID: userId, guildID: guildId, season: seasonId });
+            const user = await Player.findOne({ userID: userId, guildID: guildId, season: seasonId, gameDef: isDefault });
 
             if (!user) {
                 interaction.followUp(`<@${userId}> not found.`);

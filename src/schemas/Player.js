@@ -1,5 +1,5 @@
-import { StringSelectMenuBuilder } from "@discordjs/builders";
-import { Schema, model } from "mongoose";
+
+import { Schema } from "mongoose";
 import mongoose from 'mongoose';
 
 const playerSchema = new Schema({
@@ -77,6 +77,11 @@ const playerSchema = new Schema({
     hackerMVP: {
         type: Number,
         default: 0, 
+        required: true
+    }, 
+    gameDef: {
+        type: Boolean,
+        default: true, 
         required: true
     }
 });

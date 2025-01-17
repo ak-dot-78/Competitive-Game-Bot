@@ -1,5 +1,6 @@
+/* eslint-disable no-undef */
 import Player from '../../schemas/Player.js';
-import { ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
+import { ApplicationCommandOptionType } from 'discord.js';
 import dotenv from 'dotenv';
 dotenv.config();
 

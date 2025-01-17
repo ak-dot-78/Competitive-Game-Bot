@@ -1,5 +1,5 @@
 import Player from '../../schemas/Player.js';
-import { ApplicationCommandOptionType,  EmbedBuilder, AttachmentBuilder } from 'discord.js';
+import { ApplicationCommandOptionType,  EmbedBuilder } from 'discord.js';
 import displaySeasonName from '../../utils/displaySeasonName.js';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -22,7 +22,9 @@ const addCommand = {
             choices: [
                 { name: "Lifetime", value: "lifetime"},
                 { name: "Pre-Season", value: "0000" },
-                { name: "Season-1", value: "0001" }
+                { name: "Season-1", value: "0001" }, 
+                { name: "season-2", value: "0002"},
+                { name: "season-3", value: "0003"}
             ]
         },
     ],
@@ -35,12 +37,13 @@ const addCommand = {
         }
 
         if (!seasonId) {
+            // eslint-disable-next-line no-undef
             seasonId = process.env.CURRENT_SEASON;
         }
 
         const userId = userOption.id;
         const guildId = interaction.guild.id;
-        const displayName = displaySeasonName(seasonId);
+        const displayName = displaySeasonName(seasonId, true);
         try {
             await interaction.deferReply(); // defer the initial reply
             const user = await Player.findOne({ userID: userId, guildID: guildId, season: seasonId });

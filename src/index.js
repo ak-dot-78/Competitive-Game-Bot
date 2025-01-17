@@ -8,6 +8,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 
 (async () => {
     try {
+      // eslint-disable-next-line no-undef
       await mongoose.connect(process.env.MONGO_URL);
       console.log("Connected to DB");
 
@@ -17,6 +18,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
       console.log(collections.map(c => c.name)); 
       
       eventHandler(client);
+      // eslint-disable-next-line no-undef
       client.login(process.env.TOKEN);
 
     } catch (error) {

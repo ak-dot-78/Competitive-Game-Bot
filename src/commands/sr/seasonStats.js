@@ -2,11 +2,12 @@ import determineTopTen from '../../utils/determineTopTen.js';
 import { ApplicationCommandOptionType,  EmbedBuilder } from 'discord.js';
 import displaySeasonName from '../../utils/displaySeasonName.js';
 import dotenv from 'dotenv';
+import Game from '../../schemas/Game.js'
 dotenv.config();
 
 const addCommand = {
-    name: "leaderboard",
-    description: "look at the leaderboard! (default: current season)",
+    name: "seasonstats",
+    description: "season stats",
     // devOnly: true,
     // testOnly: Boolean, 
     options: [
@@ -55,29 +56,23 @@ const addCommand = {
         try {
             await interaction.deferReply(); // defer the initial reply
 
-            const players = await determineTopTen(guildId, seasonId, isDefault );
-            console.log(seasonId);
+            const stats = await Game.find({season: seasonId, guildID: guildId, gameDef: isDefault})
+            console.log(stats);
             const displayName = displaySeasonName(seasonId, isDefault);
-
-            if (players.length === 0) {
-                await interaction.followUp('There are no users in this server.');
-            }
             
-            else {
-
-                const leaderboardEmbed = new EmbedBuilder()
-                .setTitle(`${displayName} Leaderboard`)
-                .addFields(
-                    { name: 'Position', value: players.map((_, index) => `${index === 0 ? '1 <:hammer:1221908675980038266>' : index + 1}`).join('\n'), inline: true },
-                    { name: 'Name', value: players.map(player => player.username).join('\n'), inline: true },
-                    { name: 'SR Rating', value: players.map(player => player.SR.toString()).join('\n'), inline: true },
-                )
-                .setColor('#0099ff') 
-                .setTimestamp(); 
-                await interaction.followUp({ embeds: [leaderboardEmbed] });
-                console.log("Replied with leaderboard stats.");
-
-            }
+            const statsEmbed = new EmbedBuilder()
+            .setTitle(`${displayName} Stats`)
+            .addFields(
+                { name: 'Total Games', value: stats.totalGames, inline: true },
+                { name: 'Agent Wins', value: stats.agentWins, inline: true },
+                { name: 'Agent Winrate', value: `${(stats.agentWins * 100 / stats.totalGames).toFixed(2)}%`, inline: true }, // Added comma here
+                { name: 'Hacker Wins', value: stats.hackerWins, inline: true },
+                { name: 'Hacker Winrate', value: `${(stats.hackerWins * 100 / stats.totalGames).toFixed(2)}%`, inline: true } // Corrected typo and added percentage formatting
+            )
+            .setColor('#0099ff')
+            .setTimestamp();
+            await interaction.followUp({ embeds: [statsEmbed] });
+            console.log("Replied with season stats.");
             
         } catch (error) {
             console.error("Failed to check leaderboard:", error);
